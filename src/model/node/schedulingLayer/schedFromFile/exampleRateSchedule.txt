@@ -1,0 +1,72 @@
+# This is an example rate schedule script
+# The format is as follows:
+# <startTime>;<source>;<destination>;<assignedRate>
+# Rates are assumed to between hosts and at times not specified in file.
+
+0 s;	0;	0;	1 Mbps
+0 s;	0;	1;	1 Mbps
+0 s;	0;	2;	1 Mbps
+0 s;	0;	3;	1 Mbps
+0 s;	1;	0;	1 Mbps
+0 s;	1;	1;	1 Mbps
+0 s;	1;	2;	1 Mbps
+0 s;	1;	3;	1 Mbps
+0 s;	2;	0;	1 Mbps
+0 s;	2;	1;	1 Mbps
+0 s;	2;	2;	1 Mbps
+0 s;	2;	3;	1 Mbps
+0 s;	3;	0;	1 Mbps
+0 s;	3;	1;	1 Mbps
+0 s;	3;	2;	1 Mbps
+0 s;	3;	3;	1 Mbps
+
+0.1 s;	0;	0;	2 Mbps
+0.1 s;	0;	1;	2 Mbps
+0.1 s;	0;	2;	2 Mbps
+0.1 s;	0;	3;	2 Mbps
+0.1 s;	1;	0;	2 Mbps
+0.1 s;	1;	1;	2 Mbps
+0.1 s;	1;	2;	2 Mbps
+0.1 s;	1;	3;	2 Mbps
+0.1 s;	2;	0;	2 Mbps
+0.1 s;	2;	1;	2 Mbps
+0.1 s;	2;	2;	2 Mbps
+0.1 s;	2;	3;	2 Mbps
+0.1 s;	3;	0;	2 Mbps
+0.1 s;	3;	1;	2 Mbps
+0.1 s;	3;	2;	2 Mbps
+0.1 s;	3;	3;	2 Mbps
+
+0.2 s;	0;	0;	3 Mbps
+0.2 s;	0;	1;	3 Mbps
+0.2 s;	0;	2;	3 Mbps
+0.2 s;	0;	3;	3 Mbps
+0.2 s;	1;	0;	3 Mbps
+0.2 s;	1;	1;	3 Mbps
+0.2 s;	1;	2;	3 Mbps
+0.2 s;	1;	3;	3 Mbps
+0.2 s;	2;	0;	3 Mbps
+0.2 s;	2;	1;	3 Mbps
+0.2 s;	2;	2;	3 Mbps
+0.2 s;	2;	3;	3 Mbps
+0.2 s;	3;	0;	3 Mbps
+0.2 s;	3;	1;	3 Mbps
+0.2 s;	3;	2;	3 Mbps
+0.2 s;	3;	3;	3 Mbps
+
+0.3 s;	0;	0;	4 Mbps
+0.3 s;	0;	1;	4 Mbps
+0.3 s;	0;	2;	4 Mbps
+0.3 s;	0;	3;	4 Mbps
+0.3 s;	1;	0;	4 Mbps
+0.3 s;	1;	1;	4 Mbps
+0.3 s;	1;	2;	4 Mbps
+0.3 s;	1;	3;	4 Mbps
+0.3 s;	2;	0;	4 Mbps
+0.3 s;	2;	1;	4 Mbps
+0.3 s;	2;	2;	4 Mbps
+0.3 s;	2;	3;	4 Mbps
+0.3 s;	3;	0;	4 Mbps
+0.3 s;	3;	1;	4 Mbps
+0.3 s;	3;	2;	4 Mbps
+0.3 s;	3;	3;	4 Mbps

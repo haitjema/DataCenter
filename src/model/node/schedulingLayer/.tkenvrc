@@ -1,0 +1,5 @@
+# Partial Tkenv config file -- see $HOME/.tkenvrc as well
+inspector "FatTree_4_2_3" "FatTree_4_2_3" "2" "643x284+5+27:normal"
+inspector "TestNetworkForSchedulingLayer" "TestNetworkForSchedulingLayer" "2" "799x339+1120+22:normal"
+inspector "TestNetworkForSchedulingLayer.schedulingLayer" "SchedulingLayer" "2" "805x492+1118+414:normal"
+

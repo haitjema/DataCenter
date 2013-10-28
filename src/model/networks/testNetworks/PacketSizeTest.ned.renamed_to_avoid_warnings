@@ -1,0 +1,67 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
+
+package datacenter.model.networks.testNetworks;
+import datacenter.model.node.server.Server;
+import datacenter.model.common.L2Queue;
+import ned.DatarateChannel;
+
+network PacketSizeTest
+{
+    parameters:
+        // Need these parameters for the server's to work
+        **.tree_depth               = 1;
+        **.int_switches             = 0;
+        **.int_switch_down_ports    = 0;
+        **.tor_switch_up_ports      = 1;
+        **.tor_switch_down_ports    = 1;
+        **.switch_up_ports          = 0;
+        **.switch_down_ports        = 0;
+        **.switch_switch_link_speed = 1000000000;
+        **.server_switch_link_speed = 1000000000;
+        **.numberOfPaths = 1;
+    
+    types:
+        channel Link_1Gbps extends DatarateChannel
+        {
+            datarate = 1 Gbps;
+        }
+
+    submodules:
+        Server_0: Server {
+            parameters:
+                address = 0;
+                @display("p=100,100");
+            gates:
+        }
+        Server_1: Server {
+            parameters:
+                address = 1;
+                @display("p=300,100");
+            gates:
+        }
+        queue: L2Queue {
+            @display("p=200,100");
+            @statistic[rxBytes](title="received packet byte length"; unit=bytes; record=vector,count,sum,histogram; interpolationmode=none);
+            @statistic[txBytes](title="transmitting packet byte length"; unit=bytes; record=vector,count,sum,histogram; interpolationmode=none);
+            @statistic[qlenBytes](title="queue length (bytes)"; record=vector,timeavg,max; interpolationmode=sample-hold);
+            @statistic[qlenPkts](title="queue length (pkts)"; record=vector,timeavg,max; interpolationmode=sample-hold);
+            @statistic[drop](title="dropped packet byte length"; unit=bytes; record=vector,min,max,mean,count,sum; interpolationmode=none);
+        }
+
+    connections allowunconnected:
+        Server_0.port$o -->  Link_1Gbps --> queue.in;
+        queue.line <-->  Link_1Gbps <--> Server_1.port;
+}

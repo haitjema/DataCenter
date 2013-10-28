@@ -1,0 +1,3 @@
+# Partial Tkenv config file -- see $HOME/.tkenvrc as well
+inspector "TestNetworkForResequencer" "TestNetworkForResequencer" "2" "772x283+371+244:normal"
+

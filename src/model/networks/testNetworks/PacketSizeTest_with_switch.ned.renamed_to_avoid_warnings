@@ -1,0 +1,81 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
+
+package datacenter.model.networks.testNetworks;
+import datacenter.model.node.server.Server;
+import datacenter.model.switch.EthSwitch;
+import ned.DatarateChannel;
+
+network PacketSizeTest_with_Switch
+{
+    parameters:
+        // Need these parameters for the server's to work
+		**.tree_depth               = 3;
+		**.int_switches             = 1;
+    	**.int_switch_down_ports    = 4;
+    	**.tor_switch_up_ports      = 2;
+        **.tor_switch_down_ports    = 2;
+        **.switch_up_ports          = 2;
+        **.switch_down_ports        = 2;
+        **.switch_switch_link_speed = 1 Gbps;
+        **.server_switch_link_speed = 1 Gbps;
+        **.numberOfPaths = 1;
+
+    types:
+        channel Link_1Gbps extends DatarateChannel
+        {
+            datarate = 1 Gbps;
+        }
+
+    submodules:
+        Server_0: Server {
+            parameters:
+                address = 0;
+                @display("p=301,177");
+            gates:
+        }
+        Server_1: Server {
+            parameters:
+                address = 1;
+                @display("p=301,72");
+            gates:
+        }
+        Server_2: Server {
+            parameters:
+                address = 1;
+                @display("p=628,122");
+            gates:
+        }
+        Switch: EthSwitch {
+            parameters:
+                @display("p=454,122,x");
+                switch_id = "Switch";
+                depth = 0;
+                sub_tree_id = 9999; // packets will always be in the wrong sub-tree so they will be forwarded out the up-port
+                //@statistic[rxBytes](title="received packet byte length"; unit=bytes; record=vector,count,sum,histogram; interpolationmode=none);
+            	//@statistic[txBytes](title="transmitting packet byte length"; unit=bytes; record=vector,count,sum,histogram; interpolationmode=none);
+            	//@statistic[qlenBytes](title="queue length (bytes)"; record=vector,timeavg,max; interpolationmode=sample-hold);
+            	//@statistic[qlenPkts](title="queue length (pkts)"; record=vector,timeavg,max; interpolationmode=sample-hold);
+            	//@statistic[drop](title="dropped packet byte length"; unit=bytes; record=vector,min,max,mean,count,sum; interpolationmode=none);
+            gates:
+                down_port[2];
+                up_port[1];
+        }
+
+    connections allowunconnected:
+        Server_0.port <--> Link_1Gbps <--> Switch.down_port[0];
+        Server_1.port <--> Link_1Gbps <--> Switch.down_port[1];
+        Server_2.port <--> Link_1Gbps <--> Switch.up_port[0];
+}

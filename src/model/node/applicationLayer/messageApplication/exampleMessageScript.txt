@@ -1,0 +1,34 @@
+# Message script is a set of application messages M where a messsage Mijk is the kth message from server i to server j 
+# Each message has the following information in it:
+# source: the sending server i
+# destination: the receiving server j
+# messageNum: the message number k
+# startTime: the earliest time at which the message can be sent in seconds
+# messageSize: the size of the message in bytes
+# messageRate: an optional limit on the rate at which the message should be sent (0 = no limit)
+
+# Message format is as follows:
+# <source>;<destination>;<messageNum>;<startTime>;<messageSize>;<messageRate>
+
+0;	8;	0;	0 s;	200 MiB;	1 Gbps
+1;	9;	0;	0 s;	200 MiB;	1 Gbps
+2;	10;	0;	0 s;	200 MiB;	1 Gbps
+3;	11;	0;	0 s;	200 MiB;	1 Gbps
+4;	12;	0;	0 s;	200 MiB;	1 Gbps
+5;	13;	0;	0 s;	200 MiB;	1 Gbps
+6;	14;	0;	0 s;	200 MiB;	1 Gbps
+7;	15;	0;	0 s;	200 MiB;	1 Gbps
+8;	0;	0;	0 s;	200 MiB;	1 Gbps
+9;	1;	0;	0 s;	200 MiB;	1 Gbps
+10;	2;	0;	0 s;	200 MiB;	1 Gbps
+11; 3;	0;	0 s;	200 MiB;	1 Gbps
+12;	4;	0;	0 s;	200 MiB;	1 Gbps
+13;	5;	0;	0 s;	200 MiB;	1 Gbps
+14;	6;	0;	0 s;	200 MiB;	1 Gbps
+15;	7;	0;	0 s;	200 MiB;	1 Gbps
+
+
+0; 1; 2; 0 s; 1 MiB; 100 Mbps # After parsing, entries automatically ordered chronologically
+0; 1; 1; 500 ms; 5 MiB + 100 KiB; 3 Mbps + 100 kbps
+1; 2; 3; 1.5 s; 1 GiB; 1 Gbps 
+0; 1; 3; 2s - 100us ; 500 KiB; 100 Mbps
