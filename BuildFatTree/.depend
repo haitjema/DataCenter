@@ -1,0 +1,12 @@
+connection.o: connection.cc std_includes.h node_id.h ethernet_node.h \
+  connection.h
+ethernet_node.o: ethernet_node.cc std_includes.h node_id.h \
+  ethernet_node.h
+ethernet_switch.o: ethernet_switch.cc std_includes.h node_id.h \
+  ethernet_node.h ethernet_switch.h
+fat_tree.o: fat_tree.cc std_includes.h node_id.h ethernet_node.h \
+  ethernet_switch.h server.h connection.h fat_tree.h
+main.o: main.cc std_includes.h node_id.h ethernet_node.h \
+  ethernet_switch.h fat_tree.h
+node_id.o: node_id.cc std_includes.h node_id.h
+server.o: server.cc std_includes.h node_id.h ethernet_node.h server.h

@@ -1,0 +1,9 @@
+This folder contains a simple command line utility to generate NED files
+for FatTree networks. While originally intended to be more general, it 
+can currently only generate fully provisioned (i.e. full bisection 
+bandwidth) FatTrees with uniformly sized links and switches.
+As a result, the only arguments are the number of ports per switch
+and the number of levels.
+
+Note this utility depends on several files form the src/model tree
+and expects this path to be one level up.
