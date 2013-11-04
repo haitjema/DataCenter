@@ -18,7 +18,7 @@
 
 Define_Module(BandwidthMeter);
 
-BandwidthMeter::BandwidthMeter()
+BandwidthMeter::BandwidthMeter() : bandwidthMeasurementEvent(NULL)
 {
 
 }
@@ -32,7 +32,6 @@ void BandwidthMeter::initialize()
     batchSize_ = (unsigned int)_batchSize;
     maxInterval_ = par("maxBandwidthMeasureInterval");
 
-	bandwidthMeasurementEvent = NULL;
 	bitsInInterval_ = pktsInInterval_ = 0;
 	intvlStartTime_ = intvlLastPkTime_ = 0;
 

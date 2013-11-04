@@ -19,27 +19,27 @@
 #include "TrafficPatternGenerator.h"
 #include "TrafficPatternFactory.h"
 
-Define_Module(TrafficPatternGenerator);
+//Define_Module(TrafficPatternGenerator);
 
 
-TrafficPatternGenerator::TrafficPatternGenerator()
-{
-	FatTreeNode::initialize();
-    trafficPattern = NULL;
-}
-
-void TrafficPatternGenerator::initialize()
-{
-
-    TrafficPatternFactory factory;
-    const char *type = getAncestorPar("scriptGenType").stringValue();
-    trafficPattern = factory.createTrafficPattern(type);
-    if (!strcmp(type, "AllToAllPartition") || !strcmp(type, "AllToAllVictimTenant")) {
-        uint partitionSize = getAncestorPar("scriptGenType").longValue();
-        // XXX Hacky
-        ((TP_AllToAllPartition*)trafficPattern)->setPartitionSize(partitionSize);
-    }
-}
+//TrafficPatternGenerator::TrafficPatternGenerator()
+//{
+//    trafficPattern = NULL;
+//}
+//
+//void TrafficPatternGenerator::initialize()
+//{
+//    //FatTreeNode::initialize();
+//    node_id_ = getParentModule()->node_id_;
+//    TrafficPatternFactory factory;
+//    const char *type = getAncestorPar("scriptGenType").stringValue();
+//    trafficPattern = factory.createTrafficPattern(type);
+//    if (!strcmp(type, "AllToAllPartition") || !strcmp(type, "AllToAllVictimTenant")) {
+//        uint partitionSize = getAncestorPar("scriptGenType").longValue();
+//        // XXX Hacky
+//        ((TP_AllToAllPartition*)trafficPattern)->setPartitionSize(partitionSize);
+//    }
+//}
 
 
 void TrafficPatternGenerator::assignRandomStartTimes(double max_time)
@@ -58,11 +58,17 @@ bool TrafficPatternGenerator::scriptExists(const char *scriptFile)
 }
 
 
-void TrafficPatternGenerator::generateTraffic()
+void TrafficPatternGenerator::generateTraffic(const char *type, double messageSize, uint partitionSize, bool randomStartTimes)
 {
-    double messageSize = getAncestorPar("messageSize").doubleValue();
+    TrafficPatternFactory factory;
+    TrafficPattern *trafficPattern = factory.createTrafficPattern(type);
+    //double messageSize = getAncestorPar("messageSize").doubleValue();
+    if (!strcmp(type, "AllToAllPartition") || !strcmp(type, "AllToAllVictimTenant")) {
+        ((TP_AllToAllPartition*)trafficPattern)->setPartitionSize(partitionSize);
+    }
     messages = trafficPattern->createTraffic(node_id_, messageSize);
-    bool randomStartTimes = getAncestorPar("randomStartTimes").boolValue();
+    delete trafficPattern;
+    //bool randomStartTimes = getAncestorPar("randomStartTimes").boolValue();
     // Assign random start times to help desynchronize them
     if (randomStartTimes) { assignRandomStartTimes(); } // Use the default maximum time
 }
@@ -103,7 +109,7 @@ void TrafficPatternGenerator::writeScript(const char *scriptFile)
 
 void TrafficPatternGenerator::loadScript(const char *script, long address)
 {
-    LOG(DEBUG) << "Parsing script " << script << endl;
+    //LOG(DEBUG) << "Parsing script " << script << endl;
     std::string line; long lineNum = 0;
     std::ifstream scriptFile(script);
     if (scriptFile.is_open()) opp_error("Couldn't open script file %s", script);
@@ -120,33 +126,33 @@ void TrafficPatternGenerator::loadScript(const char *script, long address)
 
         // parse source
         if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: source is expected on %u", lineNum);
-        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(parent);
         msg.source = value.longValue();
         if (address != -1 && msg.source != address) continue; // Ignore messages belonging to other servers
 
         // parse destination
         if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: destination is expected on %u", lineNum);
-        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(parent);
         msg.destination = value.longValue();
 
         // parse messageNum
         if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: messageNum is expected on %u", lineNum);
-        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(parent);
         msg.messageNum = value.longValue();
 
         // parse startTime
         if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: start time expected on line %u", lineNum);
-        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(parent);
         msg.startTime = value.doubleValueInUnit("s");
 
         // parse messageSize
         if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: message size is expected on line %u", lineNum);
-        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+        token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(parent);
         msg.messageSize = value.doubleValueInUnit("bytes");
 
         // parse messageRate
         if (tokenizer.hasMoreTokens()) {
-            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(parent);
             msg.messageRate = value.doubleValueInUnit("bps");
         } else {
             //opp_error("syntax error in script: message rate is expected on line %u", lineNum);
@@ -161,8 +167,8 @@ void TrafficPatternGenerator::loadScript(const char *script, long address)
     std::sort(messages.begin(), messages.end(), sortByStartTime);
 }
 
-TrafficPatternGenerator::~TrafficPatternGenerator()
-{
-    //if (trafficPattern) { trafficPattern->deleteModule(); }
-}
-
+//TrafficPatternGenerator::~TrafficPatternGenerator()
+//{
+//    //if (trafficPattern) { trafficPattern->deleteModule(); }
+//}
+//

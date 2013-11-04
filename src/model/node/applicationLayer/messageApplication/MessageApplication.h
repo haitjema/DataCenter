@@ -36,15 +36,15 @@
 #include "ActiveMessage.h"
 #include "ServerStream.h"
 #include "ModuleWithControlPort.h"
-#include "TrafficPatternGenerator.h"
 
 
 class MessageApplication : public ModuleWithControlPort
 {
   public:
+    MessageApplication();
     virtual ~MessageApplication();
-	virtual void initialize(int stage);
-	int numInitStages() const { return 2; }
+    virtual void initialize(int stage);
+    int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void handleControlMessage(ControlMessage *cmsg);
     virtual void finish();
@@ -54,6 +54,9 @@ class MessageApplication : public ModuleWithControlPort
     virtual bool sendTimeLimitReached() { return (sendTimeLimit_ && (simTime() > sendTimeLimit_)); }
     //{ return sendTimeLimit_ ? (simTime() > sendTimeLimit_) : false; }
   protected:
+    virtual AppMessageVector createTrafficPattern(const char *type);
+    virtual bool scriptExists(const char *script);
+    virtual void writeScript(const AppMessageVector &messages, const char *script);
     virtual void parseScript(const char *script);
     virtual void activateMessage(AppMessage *appMsg);
     virtual void activateSendStream(uint otherServer);
@@ -71,33 +74,30 @@ class MessageApplication : public ModuleWithControlPort
   protected:
     double linkRate_;
     double maxSendRate_; 		// limit on rate of all traffic leaving application
-	long payloadSize_;
-	bool randomInterArrival_;   // False means uniform traffic spacing (can still use bursty)
-	double burstyInjectRate_;
-	double avgBurstLen_;
-	double avgTimeBetweenBursts_;
-	double sendTimeLimit_;
-	bool recordStreamStatistics_;
-	bool useHardcodedStreamStatistics_;
-	int limitStatsToEveryPServers;
-	int alt_max_min_; // Needed for alternating max., min. pkt sizes
+    long payloadSize_;
+    bool randomInterArrival_;   // False means uniform traffic spacing (can still use bursty)
+    double burstyInjectRate_;
+    double avgBurstLen_;
+    double avgTimeBetweenBursts_;
+    double sendTimeLimit_;
+    bool recordStreamStatistics_;
+    bool useHardcodedStreamStatistics_;
+    int limitStatsToEveryPServers;
+    int alt_max_min_; // Needed for alternating max., min. pkt sizes
 
-	TrafficPatternGenerator *trafficGen;
+    cMessage *nextMessageArrival;
+    cMessage *sendNextSegmentEvent;
 
-	cMessage *nextMessageArrival;
-	cMessage *sendNextSegmentEvent;
+    AppMessageVector scheduledMessages;
+    ActiveMessageQueue activeMessages;
 
-	AppMessageVector scheduledMessages;
-	ActiveMessageQueue activeMessages;
+    simsignal_t txPktToHostSignal; //
 
-	simsignal_t txPktToHostSignal; //
+    cGate *to_lower_layer_; cGate *from_lower_layer_;
 
-	cGate *to_lower_layer_;
-    cGate *from_lower_layer_;
-
-	// Per stream statistics
-	SendStreamMap sendingStreams; // for streams where we are the sending end point, indexed by other server's address
-	ReceiveStreamMap receivingStreams; // for streams where we are the receiving end point, indexed by other server's address
+    // Per stream statistics
+    SendStreamMap sendingStreams; // for streams where we are the sending end point, indexed by other server's address
+    ReceiveStreamMap receivingStreams; // for streams where we are the receiving end point, indexed by other server's address
 };
 
 

@@ -18,7 +18,7 @@
 
 AppMessageVector TP_AllToAllPartition::createTraffic(const SubTreeID &node_id, double messageSize)
 {
-    node_id_ = node_id; messageSize = messageSize;
+    node_id_ = node_id; messageSize_ = messageSize;
     AppMessageVector messages;
     if (partitionSize == 0) {
         partitionSize = node_id_.getNumberOfServers()/node_id_.getDownRadix(0);

@@ -17,7 +17,7 @@
 
 AppMessageVector TP_PairedPermutation::createTraffic(const SubTreeID &node_id, double messageSize)
 {
-    node_id_ = node_id; messageSize = messageSize;
+    node_id_ = node_id; messageSize_ = messageSize;
     uint_vec_t serverAssignments;
     createPermutationPair(serverAssignments);
     reassignServersPairedInSameSubtree(serverAssignments);
@@ -30,7 +30,7 @@ AppMessageVector TP_PairedPermutation::createTraffic(const SubTreeID &node_id, d
         msg->messageNum = 0;
         msg->startTime = 0;
         //msg->messageSize = (double)10*1024*1024*1024*8; // 10 GiB (large enough for 1 second at 1 Gbps), XXX Find a better way to do this
-        msg->messageSize = messageSize_;
+        msg->messageSize = messageSize;
         msg->messageRate = 0; // Unlimited
         messages.push_back(msg);
     }

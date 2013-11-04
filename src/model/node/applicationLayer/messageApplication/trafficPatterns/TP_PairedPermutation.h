@@ -20,7 +20,7 @@
 
 class TP_PairedPermutation : public TrafficPattern {
 public:
-    virtual AppMessageVector createTraffic(const SubTreeID &node_id, double messageSize);
+    virtual AppMessageVector createTraffic(const SubTreeID &node_id, double messageSize=0);
 protected:
     virtual void createPermutationPair(uint_vec_t &serverAssignments);
     virtual void reassignServersPairedInSameSubtree(uint_vec_t &serverAssignments);

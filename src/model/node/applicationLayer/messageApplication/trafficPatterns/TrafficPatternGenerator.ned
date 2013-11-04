@@ -16,7 +16,7 @@
 package datacenter.model.node.applicationLayer.messageApplication.trafficPatterns;
 import datacenter.model.common.FatTreeNode;
 
-simple TrafficPatternGenerator extends FatTreeNode
+simple TrafficPatternGenerator // extends FatTreeNode
 {
     parameters:
     	@class(TrafficPatternGenerator);
