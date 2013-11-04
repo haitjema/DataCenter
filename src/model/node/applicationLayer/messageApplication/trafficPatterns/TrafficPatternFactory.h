@@ -17,7 +17,6 @@
 #define TRAFFIC_PATTERN_FACTORY_H_
 
 #include "TrafficPattern.h"
-#include "TP_Permutation.h"
 #include "TP_PairedPermutation.h"
 #include "TP_PairedPodPermutation.h"
 #include "TP_LBDestImbalance.h"
@@ -31,10 +30,7 @@ public:
     TrafficPattern* createTrafficPattern(std::string type)
     {
         TrafficPattern* pattern = NULL;
-        if (!type.compare("PermutationTraffic")) {
-            opp_error("PermutationTraffic seems to have stopped working somehow! Not a true permutation."); // XXX
-            pattern = new TP_Permutation();
-        } else if (!type.compare( "PairedPermutationTraffic")) {
+        if (!type.compare( "PairedPermutationTraffic")) {
             pattern = new TP_PairedPermutation();
         } else if (!type.compare("PairedPodTraffic")) {
             pattern = new TP_PairedPodPermutation();

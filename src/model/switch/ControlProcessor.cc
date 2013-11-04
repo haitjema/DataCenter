@@ -127,24 +127,16 @@ void ControlProcessor::handleMessage(cMessage *msg)
 		}
 	}
 
-    int destGate = lookup(destAddr, path);
-
-    if (destGate == -1) {
-    	// Invalid port
-    	delete msg;
-    } else {
-
-    	if (useDirectMsgSending_) {
-    	    // XXX FIXME TODO This way of using direct method calls to send messages
-    	    // doesn't easily allow for adding the processingDelay_. May need to pass
-    	    // that as a parameter to the queues so that they can deal with it...
-    	    SwitchPortQueue *queue = lookupQueue(destAddr, path);
-    	    queue->handleMessageDirect(msg);
-    	} else {
-    	    int destGate = lookupGateID(destAddr, path);
-    	    sendDelayed(msg, processingDelay_, destGate);
-    	}
-    }
+	if (useDirectMsgSending_) {
+	    // XXX FIXME TODO This way of using direct method calls to send messages
+	    // doesn't easily allow for adding the processingDelay_. May need to pass
+	    // that as a parameter to the queues so that they can deal with it...
+	    SwitchPortQueue *queue = lookupQueue(destAddr, path);
+	    queue->handleMessageDirect(msg);
+	} else {
+	    int destGate = lookupGateID(destAddr, path);
+	    sendDelayed(msg, processingDelay_, destGate);
+	}
 }
 
 void ControlProcessor::downPortDirectIn(cMessage *msg, uint port)
