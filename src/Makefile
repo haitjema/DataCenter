@@ -72,8 +72,6 @@ INCLUDE_PATH = \
     -Imodel/node/applicationLayer/TCPMessageApplication \
     -Imodel/node/applicationLayer/messageApplication \
     -Imodel/node/applicationLayer/messageApplication/trafficPatterns \
-    -Imodel/node/applicationLayer/resequencingTestSource \
-    -Imodel/node/applicationLayer/trafficSourceApplication \
     -Imodel/node/control \
     -Imodel/node/linkLayer \
     -Imodel/node/networkLayer \
@@ -121,7 +119,6 @@ OBJS = \
     $O/model/node/applicationLayer/messageApplication/MAAdjustQueueSizeToRate.o \
     $O/model/node/applicationLayer/messageApplication/MAAdjustRateToThreshold.o \
     $O/model/node/applicationLayer/messageApplication/MessageApplication.o \
-    $O/model/node/applicationLayer/messageApplication/ScriptGenerator.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAll.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllPartition.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllVictimTenant.o \
@@ -129,11 +126,6 @@ OBJS = \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPermutation.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPermutation.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.o \
-    $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.o \
-    $O/model/node/applicationLayer/resequencingTestSource/ResequencingTestSource.o \
-    $O/model/node/applicationLayer/trafficSourceApplication/TrafficRegulator.o \
-    $O/model/node/applicationLayer/trafficSourceApplication/TrafficSink.o \
-    $O/model/node/applicationLayer/trafficSourceApplication/TrafficSource.o \
     $O/model/node/control/ControlLogic.o \
     $O/model/node/control/ModuleWithControlPort.o \
     $O/model/node/linkLayer/LoadBalancer.o \
@@ -165,7 +157,6 @@ OBJS = \
     $O/model/switch/SwitchPortQueue.o \
     $O/model/node/applicationLayer/messageApplication/UpdateQueueSizeMessage_m.o \
     $O/model/node/applicationLayer/messageApplication/UpdateSendingRateMessage_m.o \
-    $O/model/node/applicationLayer/trafficSourceApplication/TrafficSourceControlMessage_m.o \
     $O/model/node/schedulingLayer/SchedulingMessage_m.o \
     $O/model/node/schedulingLayer/SchedulingPacket_m.o \
     $O/model/node/schedulingLayer/proxy/RequestPacket_m.o \
@@ -180,7 +171,6 @@ OBJS = \
 MSGFILES = \
     model/node/applicationLayer/messageApplication/UpdateQueueSizeMessage.msg \
     model/node/applicationLayer/messageApplication/UpdateSendingRateMessage.msg \
-    model/node/applicationLayer/trafficSourceApplication/TrafficSourceControlMessage.msg \
     model/node/schedulingLayer/SchedulingMessage.msg \
     model/node/schedulingLayer/SchedulingPacket.msg \
     model/node/schedulingLayer/proxy/RequestPacket.msg \
@@ -281,8 +271,6 @@ clean:
 	$(Q)-rm -f model/node/applicationLayer/TCPMessageApplication/*_m.cc model/node/applicationLayer/TCPMessageApplication/*_m.h
 	$(Q)-rm -f model/node/applicationLayer/messageApplication/*_m.cc model/node/applicationLayer/messageApplication/*_m.h
 	$(Q)-rm -f model/node/applicationLayer/messageApplication/trafficPatterns/*_m.cc model/node/applicationLayer/messageApplication/trafficPatterns/*_m.h
-	$(Q)-rm -f model/node/applicationLayer/resequencingTestSource/*_m.cc model/node/applicationLayer/resequencingTestSource/*_m.h
-	$(Q)-rm -f model/node/applicationLayer/trafficSourceApplication/*_m.cc model/node/applicationLayer/trafficSourceApplication/*_m.h
 	$(Q)-rm -f model/node/control/*_m.cc model/node/control/*_m.h
 	$(Q)-rm -f model/node/linkLayer/*_m.cc model/node/linkLayer/*_m.h
 	$(Q)-rm -f model/node/networkLayer/*_m.cc model/node/networkLayer/*_m.h
@@ -301,7 +289,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc model/*.cc model/common/*.cc model/link/*.cc model/networks/*.cc model/networks/fattree/*.cc model/networks/fattree/generatedOutsideOmnet/*.cc model/networks/fattree/iterative/*.cc model/networks/fattree/recursive/*.cc model/networks/testNetworks/*.cc model/node/*.cc model/node/applicationLayer/*.cc model/node/applicationLayer/BklgSchedApplication/*.cc model/node/applicationLayer/TCPMessageApplication/*.cc model/node/applicationLayer/messageApplication/*.cc model/node/applicationLayer/messageApplication/trafficPatterns/*.cc model/node/applicationLayer/resequencingTestSource/*.cc model/node/applicationLayer/trafficSourceApplication/*.cc model/node/control/*.cc model/node/linkLayer/*.cc model/node/networkLayer/*.cc model/node/resequencingLayer/*.cc model/node/resequencingLayer/test/*.cc model/node/schedulingLayer/*.cc model/node/schedulingLayer/proxy/*.cc model/node/schedulingLayer/schedFromFile/*.cc model/node/server/*.cc model/node/transportLayer/*.cc model/packets/*.cc model/switch/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc model/*.cc model/common/*.cc model/link/*.cc model/networks/*.cc model/networks/fattree/*.cc model/networks/fattree/generatedOutsideOmnet/*.cc model/networks/fattree/iterative/*.cc model/networks/fattree/recursive/*.cc model/networks/testNetworks/*.cc model/node/*.cc model/node/applicationLayer/*.cc model/node/applicationLayer/BklgSchedApplication/*.cc model/node/applicationLayer/TCPMessageApplication/*.cc model/node/applicationLayer/messageApplication/*.cc model/node/applicationLayer/messageApplication/trafficPatterns/*.cc model/node/control/*.cc model/node/linkLayer/*.cc model/node/networkLayer/*.cc model/node/resequencingLayer/*.cc model/node/resequencingLayer/test/*.cc model/node/schedulingLayer/*.cc model/node/schedulingLayer/proxy/*.cc model/node/schedulingLayer/schedFromFile/*.cc model/node/server/*.cc model/node/transportLayer/*.cc model/packets/*.cc model/switch/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/model/common/BandwidthMeter.o: model/common/BandwidthMeter.cc \
@@ -679,7 +667,6 @@ $O/model/node/applicationLayer/messageApplication/MessageApplication.o: model/no
 	model/node/applicationLayer/messageApplication/ActiveMessage.h \
 	model/node/applicationLayer/messageApplication/AppMessage.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
-	model/node/applicationLayer/messageApplication/ScriptGenerator.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAll.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllPartition.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllVictimTenant.h \
@@ -687,32 +674,6 @@ $O/model/node/applicationLayer/messageApplication/MessageApplication.o: model/no
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPermutation.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPermutation.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/control/ModuleWithControlPort.h \
-	model/packets/ControlMessage.h \
-	model/packets/ControlMessage_m.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/messageApplication/ScriptGenerator.o: model/node/applicationLayer/messageApplication/ScriptGenerator.cc \
-	model/common/DCCommon.h \
-	model/common/FatTreeNode.h \
-	model/common/ServerStream.h \
-	model/common/node_id.h \
-	model/node/applicationLayer/messageApplication/ActiveMessage.h \
-	model/node/applicationLayer/messageApplication/AppMessage.h \
-	model/node/applicationLayer/messageApplication/MessageApplication.h \
-	model/node/applicationLayer/messageApplication/ScriptGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/packets/ControlMessage.h \
 	model/packets/ControlMessage_m.h \
@@ -878,118 +839,6 @@ $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern
 	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
 	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
 	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.o: model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.cc \
-	model/common/DCCommon.h \
-	model/common/DCUtilities.h \
-	model/common/FatTreeNode.h \
-	model/common/node_id.h \
-	model/node/applicationLayer/messageApplication/AppMessage.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAll.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllPartition.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllVictimTenant.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_LBDestImbalance.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPermutation.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPermutation.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternFactory.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/resequencingTestSource/ResequencingTestSource.o: model/node/applicationLayer/resequencingTestSource/ResequencingTestSource.cc \
-	model/common/DCCommon.h \
-	model/common/FatTreeNode.h \
-	model/common/node_id.h \
-	model/node/applicationLayer/resequencingTestSource/ResequencingTestSource.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/trafficSourceApplication/TrafficRegulator.o: model/node/applicationLayer/trafficSourceApplication/TrafficRegulator.cc \
-	model/common/DCCommon.h \
-	model/node/applicationLayer/trafficSourceApplication/TrafficRegulator.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/trafficSourceApplication/TrafficSink.o: model/node/applicationLayer/trafficSourceApplication/TrafficSink.cc \
-	model/common/DCCommon.h \
-	model/common/FatTreeNode.h \
-	model/common/node_id.h \
-	model/node/applicationLayer/trafficSourceApplication/TrafficSink.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/trafficSourceApplication/TrafficSource.o: model/node/applicationLayer/trafficSourceApplication/TrafficSource.cc \
-	model/common/DCCommon.h \
-	model/common/FatTreeNode.h \
-	model/common/node_id.h \
-	model/node/applicationLayer/trafficSourceApplication/TrafficRegulator.h \
-	model/node/applicationLayer/trafficSourceApplication/TrafficSource.h \
-	model/node/applicationLayer/trafficSourceApplication/TrafficSourceControlMessage_m.h \
-	model/node/control/ModuleWithControlPort.h \
-	model/packets/ControlMessage.h \
-	model/packets/ControlMessage_m.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/trafficSourceApplication/TrafficSourceControlMessage_m.o: model/node/applicationLayer/trafficSourceApplication/TrafficSourceControlMessage_m.cc \
-	model/node/applicationLayer/trafficSourceApplication/TrafficSourceControlMessage_m.h \
-	model/packets/ControlMessage.h \
-	model/packets/ControlMessage_m.h
 $O/model/node/control/ControlLogic.o: model/node/control/ControlLogic.cc \
 	model/common/DCCommon.h \
 	model/common/FatTreeNode.h \

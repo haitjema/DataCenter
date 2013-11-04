@@ -19,7 +19,6 @@
 #include "node_id.h"
 #include "FatTreeNode.h"
 #include "MessageApplication.h"
-#include "ScriptGenerator.h"
 #include "AppMessage.h"
 #include "DCUtilities.h"
 
