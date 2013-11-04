@@ -44,10 +44,13 @@ Thumbs.db
 *_m.cc
 *_m.h
 out/*
+src/DataCenter
 DataCenter
 *.vci
 *.vec
 *.sca
+*.anf
+BuildFatTree/BuildFatTree
 
 # Other
 .metadata
