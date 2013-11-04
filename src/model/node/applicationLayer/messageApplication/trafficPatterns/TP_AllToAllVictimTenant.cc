@@ -18,7 +18,7 @@
 
 AppMessageVector TP_AllToAllVictimTenant::createTraffic(const SubTreeID &node_id, double messageSize)
 {
-    node_id_ = node_id; messageSize = messageSize;
+    node_id_ = node_id; messageSize_ = messageSize;
     AppMessageVector messages;
     // Assign messages for victim tenant
     PartitionVector partitions = partitionServers(partitionSize);

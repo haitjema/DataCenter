@@ -22,7 +22,14 @@
 #include "ScriptGenerator.h"
 #include "AppMessage.h"
 #include "DCUtilities.h"
-#include "TrafficPatternGenerator.h"
+
+#include "TrafficPattern.h"
+#include "TP_PairedPermutation.h"
+#include "TP_PairedPodPermutation.h"
+#include "TP_LBDestImbalance.h"
+#include "TP_AllToAll.h"
+#include "TP_AllToAllPartition.h"
+#include "TP_AllToAllVictimTenant.h"
 
 Define_Module(MessageApplication);
 
@@ -36,34 +43,30 @@ enum PKT_PAYLOAD_SIZE {
     POISSON_RND_PAYLOAD = -5 // with average size pkts
 };
 
-void MessageApplication::initialize(int stage)
+MessageApplication::MessageApplication() : nextMessageArrival(NULL), sendNextSegmentEvent(NULL)
 {
-    const char *script;
-    std::string scriptGenType;
-    TrafficPatternGenerator *trafficGen;
+    
+}
+
+void MessageApplication::initialize(int stage)
+{  
     // Use two-stage initialization so that one instance of an object can create
     // the script (if needed) and then all instances can read it during the second stage.
-	if (stage == 0) {
-	    LOG(DEBUG) << endl;
+    if (stage == 0) {
+        LOG(DEBUG) << endl;
 
-	    ModuleWithControlPort::initialize();
-	    script = par("messageScript").stringValue();
+        ModuleWithControlPort::initialize();
 
-        cModuleType *moduleType = cModuleType::get("datacenter.model.node.applicationLayer.messageApplication.trafficPatterns.TrafficPatternGenerator");
-        trafficGen = check_and_cast<TrafficPatternGenerator*>(moduleType->createScheduleInit(NULL, this));
-
-        if (!node_id_.getAddress() && !trafficGen->scriptExists(script)) {
-            trafficGen->generateTraffic();
-            trafficGen->writeScript(script);
+        const char *script = par("messageScript");
+        // Server with address 0 will create the script if it doesn't exist
+        if (node_id_.getAddress() == 0 && !scriptExists(script)) {
+            AppMessageVector messages = createTrafficPattern(par("scriptGenType"));
+            writeScript(messages, script);
+            while (!messages.empty()) { delete messages.back(); messages.pop_back(); }
         }
-	} else {
-
+    } else {
+        const char *script = par("messageScript");
         to_lower_layer_ = gate("lower_layer$o"); from_lower_layer_ = gate("lower_layer$i");
-
-        if (!trafficGen->scriptExists(script)) opp_error("Script %s not found!", script);
-        trafficGen->loadScript(script, node_id_.getAddress());
-        scheduledMessages = trafficGen->getMessagesForServer(node_id_.getAddress());
-
         maxSendRate_ = par("maxSendRate").doubleValue();
         payloadSize_ = par("payloadSize").longValue();
         randomInterArrival_ = par("randomInterArrival").boolValue();
@@ -74,17 +77,147 @@ void MessageApplication::initialize(int stage)
         limitStatsToEveryPServers = par("limitStatsToEveryPServers").longValue();
         linkRate_ = getLinkRate();
         WATCH(maxSendRate_);
+        parseScript(script);
 
         nextMessageArrival = new cMessage;
         sendNextSegmentEvent = new cMessage;
-
         txPktToHostSignal = registerSignal("txPktToHost");
         recordStreamStatistics_ = par("recordStreamStatistics");
         useHardcodedStreamStatistics_ = par("useHardcodedStreamStatistics");
 
         // Schedule event to make the next appMessage from scheduledMessages active
         if (scheduledMessages.size()) { scheduleAt((scheduledMessages.back())->startTime, nextMessageArrival); }
-	}
+    }
+}
+
+bool MessageApplication::scriptExists(const char *script)
+{
+    std::ifstream scriptFile(script);
+    return scriptFile.good();
+}
+
+AppMessageVector MessageApplication::createTrafficPattern(const char *type)
+{
+    TrafficPattern* trafficPattern = NULL;
+    if (!strcmp(type, "PairedPermutationTraffic")) {
+        trafficPattern = new TP_PairedPermutation();
+    } else if (!strcmp(type, "PairedPodTraffic")) {
+        trafficPattern = new TP_PairedPodPermutation();
+    } else if (!strcmp(type, "LBDestImbalance")) {
+        trafficPattern = new TP_LBDestImbalance();
+    } else if (!strcmp(type, "AllToAll")) {
+        trafficPattern = new TP_AllToAll();
+    } else if (!strcmp(type, "AllToAllPartition")) {
+        trafficPattern = new TP_AllToAllPartition();
+    } else if (!strcmp(type, "AllToAllVictim")) {
+        trafficPattern = new TP_AllToAllVictimTenant();
+    } else {
+        opp_error("Unknown traffic pattern: '%s'", type);
+    }
+    uint partitionSize = par("partitionSize");
+    double messageSize = par("messageSize");
+    if (!strcmp(type, "AllToAllPartition") || !strcmp(type, "AllToAllVictimTenant")) {
+        ((TP_AllToAllPartition*)trafficPattern)->setPartitionSize(partitionSize);
+    }
+    #define DEF_MAX_START (10.0/(1000*1000)) // 10 microseconds
+    double max_time= DEF_MAX_START;
+    AppMessageVector messages = trafficPattern->createTraffic(node_id_, messageSize);
+    delete trafficPattern;
+    if (par("randomStartTimes").boolValue()) {
+        for (AppMessageVector::const_iterator i = messages.begin(); i < messages.end(); i++) {
+            simtime_t rndTime(dblrand()*max_time);
+            (*i)->startTime = rndTime;
+        }
+    }
+    return messages;
+}
+
+void MessageApplication::writeScript(const AppMessageVector &messages, const char *script)
+{
+    // Create the directory tree if the file's path doesn't exist.
+    if (!dirExists(fullPath(script).c_str())) createDirectories(fullPath(script).c_str());
+    std::ofstream scriptFile;
+    scriptFile.open(script);
+    scriptFile << "# Script: " << script << endl;
+    time_t rawtime; struct tm * timeinfo;
+    time ( &rawtime ); timeinfo = localtime ( &rawtime );
+    scriptFile << "# Generated at time: " << asctime(timeinfo); // For some reason asctime adds a new line so no endl needed
+    scriptFile << "# Number of servers = " << node_id_.getNumberOfServers() << ", levels = "
+                    << node_id_.getDepth() << ", paths = " << node_id_.getNumberOfPaths() << endl;
+    scriptFile << "# Message format is as follows:" << endl;
+    scriptFile << "# <source>;<destination>;<messageNum>;<startTime>;<messageSize>;<messageRate>" << endl;
+    for (AppMessageVector::const_iterator i = messages.begin(); i < messages.end(); i++) {
+        scriptFile << (*i)->source << "; " << (*i)->destination << "; "
+                       << (*i)->messageNum << "; "<< (*i)->startTime << " s; "
+                       << (*i)->messageSize << " bytes; " << (*i)->messageRate << " bps" << endl;
+    }
+    scriptFile.close();
+}
+
+void MessageApplication::parseScript(const char *script)
+{
+    LOG(DEBUG) << "Parsing script " << script << endl;
+    std::string line; long lineNum = 0;
+    std::ifstream scriptFile(script);
+    if (scriptFile.is_open())
+    {
+        while ( scriptFile.good() )
+        {
+            AppMessage msg;
+            const char *token; cDynamicExpression expression; cNEDValue value;
+            std::getline(scriptFile, line); lineNum++;
+
+            // expect line to be: <send time><time unit>; <size><byte units>
+            if (!line.compare(0, 1, "#")) continue; // Ignore comment lines
+            if ( line.find_first_not_of(" \t\v\r\n") ) continue; // Ignore blank lines
+            cStringTokenizer tokenizer(line.c_str(), ";"); // Parse with ; as the delimeter
+
+            // parse source
+            if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: source is expected on %u", lineNum);
+            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+            msg.source = value.longValue();
+            if (msg.source != address_) continue; // Ignore messages belonging to other servers
+
+            // parse destination
+            if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: destination is expected on %u", lineNum);
+            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+            msg.destination = value.longValue();
+
+            // parse messageNum
+            if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: messageNum is expected on %u", lineNum);
+            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+            msg.messageNum = value.longValue();
+
+            // parse startTime
+            if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: start time expected on line %u", lineNum);
+            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+            msg.startTime = value.doubleValueInUnit("s");
+
+            // parse messageSize
+            if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: message size is expected on line %u", lineNum);
+            token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+            msg.messageSize = (ulong)value.doubleValueInUnit("bytes");
+
+            // parse messageRate
+            if (tokenizer.hasMoreTokens()) {
+                token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
+                msg.messageRate = value.doubleValueInUnit("bps");
+            } else {
+                //opp_error("syntax error in script: message rate is expected on line %u", lineNum);
+                msg.messageRate = 0; // If not specified, default is no limit
+            }
+
+            // add messages to list of scheduled messages
+            AppMessage *newMsg = new AppMessage; *newMsg = msg;
+            scheduledMessages.push_back(newMsg);
+        }
+
+        // sort the scheduled messages by start time
+        std::sort(scheduledMessages.begin(), scheduledMessages.end(), sortByStartTime);
+
+    } else {
+        opp_error("Couldn't open script file '%s'", script);
+    }
 }
 
 double MessageApplication::getLinkRate()
@@ -98,114 +231,39 @@ double MessageApplication::getLinkRate()
     return port->getTransmissionChannel()->getNominalDatarate();
 }
 
-// XXX
-void MessageApplication::parseScript(const char *script)
-{
-
-}
-
-//void MessageApplication::parseScript(const char *script)
-//{
-//	LOG(DEBUG) << "Parsing script " << script << endl;
-//	std::string line; long lineNum = 0;
-//    std::ifstream scriptFile(script);
-//    if (scriptFile.is_open())
-//    {
-//    	while ( scriptFile.good() )
-//    	{
-//    		AppMessage msg;
-//    	    const char *token; cDynamicExpression expression; cNEDValue value;
-//    		std::getline(scriptFile, line); lineNum++;
-//
-//    		// expect line to be: <send time><time unit>; <size><byte units>
-//    		if (!line.compare(0, 1, "#")) continue; // Ignore comment lines
-//    		if ( line.find_first_not_of(" \t\v\r\n") ) continue; // Ignore blank lines
-//    		cStringTokenizer tokenizer(line.c_str(), ";"); // Parse with ; as the delimeter
-//
-//    		// parse source
-//    		if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: source is expected on %u", lineNum);
-//    		token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
-//    		msg.source = value.longValue();
-//    		if (msg.source != address_) continue; // Ignore messages belonging to other servers
-//
-//    		// parse destination
-//    		if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: destination is expected on %u", lineNum);
-//    		token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
-//    		msg.destination = value.longValue();
-//
-//    		// parse messageNum
-//    		if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: messageNum is expected on %u", lineNum);
-//    		token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
-//    		msg.messageNum = value.longValue();
-//
-//    		// parse startTime
-//    		if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: start time expected on line %u", lineNum);
-//    		token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
-//    		msg.startTime = value.doubleValueInUnit("s");
-//
-//    		// parse messageSize
-//    		if (!tokenizer.hasMoreTokens()) opp_error("syntax error in script: message size is expected on line %u", lineNum);
-//    		token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
-//    		msg.messageSize = (ulong)value.doubleValueInUnit("bytes");
-//
-//    		// parse messageRate
-//    		if (tokenizer.hasMoreTokens()) {
-//    			token = tokenizer.nextToken(); expression.parse(token); value = expression.evaluate(this);
-//    			msg.messageRate = value.doubleValueInUnit("bps");
-//    		} else {
-//	   			//opp_error("syntax error in script: message rate is expected on line %u", lineNum);
-//    			msg.messageRate = 0; // If not specified, default is no limit
-//    		}
-//
-//    		// add messages to list of scheduled messages
-//    		AppMessage *newMsg = new AppMessage; *newMsg = msg;
-//    		scheduledMessages.push_back(newMsg);
-//    	}
-//
-//    	// sort the scheduled messages by start time
-//    	std::sort(scheduledMessages.begin(), scheduledMessages.end(), sortByStartTime);
-//
-//    } else {
-//    	opp_error("Couldn't open script file %s", script);
-//    }
-//}
-
 void MessageApplication::handleMessage(cMessage *msg)
 {
     // The start time of a new appMessage has arrived
     if (msg == nextMessageArrival) {
 
-		// Get the AppMessage to activate
-		AppMessage *appMsg = scheduledMessages.back(); scheduledMessages.pop_back();
+        // Get the AppMessage to activate
+        AppMessage *appMsg = scheduledMessages.back(); scheduledMessages.pop_back();
 
-		activateMessage(appMsg);
-		// XXX
-		// scheduleNextSendEvent();
+        activateMessage(appMsg);
 
-		// Determine when to activate the next message
-		if (scheduledMessages.size()) {	scheduleAt((scheduledMessages.back())->startTime, nextMessageArrival); }
+        // Determine when to activate the next message
+        if (scheduledMessages.size()) { scheduleAt((scheduledMessages.back())->startTime, nextMessageArrival); }
 
-	} else if (msg == sendNextSegmentEvent) {
+    } else if (msg == sendNextSegmentEvent) {
 
-	    // XXX Disabled right now
-	    opp_error("Received sendNextSegmentEvent");
+        // XXX Disabled right now
+        opp_error("Received sendNextSegmentEvent");
 
-	    sendNextSegment();
+        sendNextSegment();
 
-		scheduleNextSendEvent();
+        scheduleNextSendEvent();
 
-	} else if (msg->isPacket()) {
-		if (msg->getArrivalGate() == from_lower_layer_) {
-			DCN_UDPPacket *messageSegment = check_and_cast<DCN_UDPPacket*>(msg);
-			receiveSegment(messageSegment);
-		} else {
-			opp_error("Unknown message type!");
-		}
-		delete msg; msg=NULL; return;
-	} else {
-	    ModuleWithControlPort::handleMessage(msg);
-	    //if (msg) delete msg; msg = NULL;
-	}
+    } else if (msg->isPacket()) {
+        if (msg->getArrivalGate() == from_lower_layer_) {
+            DCN_UDPPacket *messageSegment = check_and_cast<DCN_UDPPacket*>(msg);
+            receiveSegment(messageSegment);
+        } else {
+            opp_error("Unknown message type!");
+        }
+        delete msg; msg=NULL; return;
+    } else {
+        ModuleWithControlPort::handleMessage(msg);
+    }
 }
 
 void MessageApplication::handleControlMessage(ControlMessage *cmsg)
@@ -233,8 +291,6 @@ void MessageApplication::scheduleNextSendEvent() // XXX Currently disabled
     if (sendTimeLimit_) {
         if (nextSendTime >= sendTimeLimit_) {
             LOG(DEBUG) << "sendTimeLimit reached! Not sending segment for " << nextMsg << endl;
-            // XXX TEMP
-            //endSimulation(); // To test out what happens when I explicitly use endSimulation()
             return;
         }
     }
@@ -245,33 +301,20 @@ void MessageApplication::activateMessage(AppMessage *appMsg)
 {
     LOG(DEBUG) << appMsg << endl;
     if (!appMsg->messageSize) {
-        //opp_error("0 length message!"); // XXX Let's just make sure this isn't happening
         LOG(DEBUG) << "Message has no size. It will be deleted." << appMsg << endl;
         delete appMsg; appMsg = NULL;
         return;
     }
-    // XXX
     cModuleType *moduleType = cModuleType::get("datacenter.model.node.applicationLayer.messageApplication.ActiveMessage");
     ActiveMessage *actMsg = check_and_cast<ActiveMessage*>(moduleType->createScheduleInit(NULL, this));
     actMsg->setAppMsg(appMsg);
-    std::string scriptGenType = par("scriptGenType");
-#ifdef MALICIOUS_TENANT_LOAD_1
-    if ((scriptGenType == "AllToAllVictim") && (appMsg->messageNum == 1)) {
-        // XXX Hack for getting malicious tenants to always send at link rate
-        maxSendRate_ = getLinkRate();
-    }
-#endif
-    //ActiveMessage *actMsg = new ActiveMessage(appMsg, linkRate_);  // XXX
-
     // Defaults... in the future we may let messages set these on their own
     actMsg->setRandomInterArrival(randomInterArrival_);
     actMsg->setBurstyInjectionRate(burstyInjectRate_);
     actMsg->setAvgBurstLen(avgBurstLen_);
     actMsg->setAvgTimeBetweenBursts(avgTimeBetweenBursts_);
     actMsg->setAvgPayloadSize(getAvgPayload());
-
     activateSendStream(appMsg->destination);
-
     activeMessages.insert(actMsg);
     updateSendRates();
 }
@@ -337,24 +380,17 @@ double MessageApplication::getAvgPayload()
     {
         case MIN_PAYLOAD:
             return 0;
-            break;
         case MAX_PAYLOAD:
             return MAX_UDP_PAYLOAD;
-            break;
         case UNIFORM_RND_PAYLOAD:
-            return MAX_UDP_PAYLOAD/2.0; // Probably 713 bytes... 732 bytes
-            break;
+            return MAX_UDP_PAYLOAD/2.0;
         case ALTERNATING_MAX_MIN:
             return MAX_UDP_PAYLOAD/2.0;
-            break;
         case POISSON_RND_PAYLOAD:
             return MAX_UDP_PAYLOAD/2.0;
-            break;
         default:
             return payloadSize_;
-            break;
     }
-    return payloadSize_;
 }
 
 long MessageApplication::getPktPayload()
@@ -363,13 +399,10 @@ long MessageApplication::getPktPayload()
     {
         case MIN_PAYLOAD:
             return 0;
-            break;
         case MAX_PAYLOAD:
             return MAX_UDP_PAYLOAD;
-            break;
         case UNIFORM_RND_PAYLOAD:
             return (long)uniform(0, MAX_UDP_PAYLOAD);
-            break;
         case ALTERNATING_MAX_MIN:
             // Alternate between maximum and minimum payload sizes
             if (alt_max_min_ == 0) {
@@ -379,15 +412,11 @@ long MessageApplication::getPktPayload()
                 alt_max_min_ = 0;
                 return 0;
             }
-            break;
         case POISSON_RND_PAYLOAD:
             return (long)poisson(MAX_UDP_PAYLOAD/2.0);
-            break;
         default:
             return payloadSize_;
-            break;
     }
-    return payloadSize_;
 }
 
 void MessageApplication::sendNextSegment(ActiveMessage *actMsg)
@@ -404,7 +433,6 @@ void MessageApplication::sendNextSegment(ActiveMessage *actMsg)
         if (!activeMessages.remove(actMsg)) { opp_error("actMsg was not in the queue!"); }
         LOG(DEBUG) << "Finished sending " << actMsg << endl;
         actMsg->deleteModule();
-        //delete actMsg;
         updateSendRates();
     }
 }
@@ -412,12 +440,12 @@ void MessageApplication::sendNextSegment(ActiveMessage *actMsg)
 void MessageApplication::sendNextSegment() // XXX Currently disabled
 {
     opp_error("sendNextSegment() called");
-	ActiveMessage *actMsg = check_and_cast<ActiveMessage *>(activeMessages.front()); activeMessages.pop();
-	LOG(DEBUG) << actMsg << endl;
+    ActiveMessage *actMsg = check_and_cast<ActiveMessage *>(activeMessages.front()); activeMessages.pop();
+    LOG(DEBUG) << actMsg << endl;
 
-	// if (actMsg->getNextSendTime() != simTime()) { opp_error("nextSendTime != simTime()"); } // Sanity check
+    // if (actMsg->getNextSendTime() != simTime()) { opp_error("nextSendTime != simTime()"); } // Sanity check
 #ifdef ERROR_CHECKING
-	ASSERT(actMsg->getNextSendTime() == simTime());
+    ASSERT(actMsg->getNextSendTime() == simTime());
 #endif
 
     DCN_UDPPacket *messageSegment = new DCN_UDPPacket;

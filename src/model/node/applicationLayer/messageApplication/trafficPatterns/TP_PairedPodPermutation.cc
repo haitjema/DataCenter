@@ -18,7 +18,7 @@
 
 AppMessageVector TP_PairedPodPermutation::createTraffic(const SubTreeID &node_id, double messageSize)
 {
-    node_id_ = node_id; messageSize = messageSize;
+    node_id_ = node_id; messageSize_ = messageSize;
     uint_vec_t serverAssignments;
     createPodPermutation(serverAssignments);
     AppMessageVector messages;

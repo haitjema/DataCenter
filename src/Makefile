@@ -128,7 +128,6 @@ OBJS = \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_LBDestImbalance.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPermutation.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPermutation.o \
-    $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_Permutation.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.o \
     $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.o \
     $O/model/node/applicationLayer/resequencingTestSource/ResequencingTestSource.o \
@@ -492,8 +491,6 @@ $O/model/node/applicationLayer/BklgSchedApplication/BklgSchedApplication.o: mode
 	model/node/applicationLayer/messageApplication/ActiveMessage.h \
 	model/node/applicationLayer/messageApplication/AppMessage.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/packets/ControlMessage.h \
 	model/packets/ControlMessage_m.h \
@@ -539,8 +536,6 @@ $O/model/node/applicationLayer/TCPMessageApplication/TCPMessageApplication.o: mo
 	model/node/applicationLayer/messageApplication/ActiveMessage.h \
 	model/node/applicationLayer/messageApplication/AppMessage.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/node/networkLayer/NetworkLayerBase.h \
 	model/node/networkLayer/VirtualIP.h \
@@ -578,8 +573,6 @@ $O/model/node/applicationLayer/messageApplication/ActiveMessage.o: model/node/ap
 	model/node/applicationLayer/messageApplication/ActiveMessage.h \
 	model/node/applicationLayer/messageApplication/AppMessage.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/packets/ControlMessage.h \
 	model/packets/ControlMessage_m.h \
@@ -627,8 +620,6 @@ $O/model/node/applicationLayer/messageApplication/MAAdjustQueueSizeToRate.o: mod
 	model/node/applicationLayer/messageApplication/MAAdjustRateToThreshold.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
 	model/node/applicationLayer/messageApplication/UpdateQueueSizeMessage_m.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/packets/ControlMessage.h \
 	model/packets/ControlMessage_m.h \
@@ -660,8 +651,6 @@ $O/model/node/applicationLayer/messageApplication/MAAdjustRateToThreshold.o: mod
 	model/node/applicationLayer/messageApplication/MAAdjustRateToThreshold.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
 	model/node/applicationLayer/messageApplication/UpdateSendingRateMessage_m.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/node/linkLayer/ServerPortQueue.h \
 	model/packets/ControlMessage.h \
@@ -691,8 +680,13 @@ $O/model/node/applicationLayer/messageApplication/MessageApplication.o: model/no
 	model/node/applicationLayer/messageApplication/AppMessage.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
 	model/node/applicationLayer/messageApplication/ScriptGenerator.h \
+	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAll.h \
+	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllPartition.h \
+	model/node/applicationLayer/messageApplication/trafficPatterns/TP_AllToAllVictimTenant.h \
+	model/node/applicationLayer/messageApplication/trafficPatterns/TP_LBDestImbalance.h \
+	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPermutation.h \
+	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPermutation.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/packets/ControlMessage.h \
 	model/packets/ControlMessage_m.h \
@@ -719,8 +713,6 @@ $O/model/node/applicationLayer/messageApplication/ScriptGenerator.o: model/node/
 	model/node/applicationLayer/messageApplication/AppMessage.h \
 	model/node/applicationLayer/messageApplication/MessageApplication.h \
 	model/node/applicationLayer/messageApplication/ScriptGenerator.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \
 	model/node/control/ModuleWithControlPort.h \
 	model/packets/ControlMessage.h \
 	model/packets/ControlMessage_m.h \
@@ -867,26 +859,6 @@ $O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPe
 	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
 	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
 	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
-$O/model/node/applicationLayer/messageApplication/trafficPatterns/TP_Permutation.o: model/node/applicationLayer/messageApplication/trafficPatterns/TP_Permutation.cc \
-	model/common/DCCommon.h \
-	model/common/node_id.h \
-	model/node/applicationLayer/messageApplication/AppMessage.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_Permutation.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
-	model/packets/DCN_EthPacket.h \
-	model/packets/DCN_EthPacket_m.h \
-	model/packets/DCN_IPPacket.h \
-	model/packets/DCN_IPPacket_m.h \
-	model/packets/DCN_TCPPacket.h \
-	model/packets/DCN_TCPPacket_m.h \
-	model/packets/DCN_UDPPacket.h \
-	model/packets/DCN_UDPPacket_m.h \
-	$(INET_PROJ)/src/base/INETDefs.h \
-	$(INET_PROJ)/src/networklayer/contract/IPProtocolId_m.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv4Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPv6Address.h \
-	$(INET_PROJ)/src/networklayer/contract/IPvXAddress.h \
-	$(INET_PROJ)/src/networklayer/ipv4/IPv4Datagram_m.h
 $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.o: model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.cc \
 	model/common/DCCommon.h \
 	model/common/node_id.h \
@@ -918,7 +890,6 @@ $O/model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_LBDestImbalance.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPermutation.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TP_PairedPodPermutation.h \
-	model/node/applicationLayer/messageApplication/trafficPatterns/TP_Permutation.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPattern.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternFactory.h \
 	model/node/applicationLayer/messageApplication/trafficPatterns/TrafficPatternGenerator.h \

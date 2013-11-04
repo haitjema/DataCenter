@@ -21,22 +21,30 @@
 
 #define DEF_MAX_START (10.0/(1000*1000)) // 10 microseconds
 
-class TrafficPatternGenerator : public FatTreeNode {
+class TrafficPatternGenerator { //: public cSimpleModule {
 public:
-    TrafficPatternGenerator();
-    virtual ~TrafficPatternGenerator();
-    virtual void initialize();
+    //void init(const SubTreeID &node_id) { node_id_ = node_id; }
+    //TrafficPatternGenerator() {}
+    //TrafficPatternGenerator(const SubTreeID &node_id, const char *scriptGenType, uint messageSize=0, uint partitionSize=0) : node_id_(node_id),
+    TrafficPatternGenerator(const SubTreeID &node_id, cSimpleModule *parent) : node_id_(node_id), parent(parent) {}
+    //virtual ~TrafficPatternGenerator();
+    //virtual void initialize() {}
+    //virtual void initialize(int stage) {}
+    //int numInitStages() const { return 1; }
     //virtual void createTrafficPattern(string TrafficPatternType); // Factory method
+    //virtual void createTrafficPattern(const char *type, double messageSize, uint partitionSize=0);
     virtual bool scriptExists(const char *scriptFile);
     virtual void writeScript(const char *scriptFile);
     virtual void loadScript(const char *scriptFile, long address=-1);
     virtual AppMessageVector getMessagesForServer(uint address);
-    virtual void generateTraffic();
+    virtual void generateTraffic(const char *type, double messageSize, uint partitionSize=0, bool randomStartTimes=true);
 protected:
     virtual void assignRandomStartTimes(double max_time=DEF_MAX_START);
     //virtual void parseScriptForSource(const char *script, uint address);
-    TrafficPattern *trafficPattern;
+    //TrafficPattern *trafficPattern;
     AppMessageVector messages;
+    SubTreeID node_id_;
+    cSimpleModule *parent;
 };
 
 #endif /* TRAFFICPATTERNGENERATOR_H_ */

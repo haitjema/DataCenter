@@ -30,27 +30,27 @@ class TrafficPatternFactory {
 public:
     TrafficPattern* createTrafficPattern(std::string type)
     {
-		TrafficPattern* pattern = NULL;
-		if (!type.compare("PermutationTraffic")) {
-			opp_error("PermutationTraffic seems to have stopped working somehow! Not a true permutation."); // XXX
-			pattern = new TP_Permutation();
-		} else if (!type.compare( "PairedPermutationTraffic")) {
-		    pattern = new TP_PairedPermutation();
-		} else if (!type.compare("PairedPodTraffic")) {
-		    pattern = new TP_PairedPodPermutation();
-		} else if (!type.compare("LBDestImbalance")) {
-		    pattern = new TP_LBDestImbalance();
-		} else if (!type.compare("AllToAll")) {
-		    pattern = new TP_AllToAll();
-		} else if (!type.compare("AllToAllPartition")) {
-		    pattern = new TP_AllToAllPartition();
-		} else if (!type.compare("AllToAllVictim")) {
-		    pattern = new TP_AllToAllVictimTenant();
-		} else {
-			opp_error("Unknown traffic pattern.");
-		}
-		return pattern;
-	}
+        TrafficPattern* pattern = NULL;
+        if (!type.compare("PermutationTraffic")) {
+            opp_error("PermutationTraffic seems to have stopped working somehow! Not a true permutation."); // XXX
+            pattern = new TP_Permutation();
+        } else if (!type.compare( "PairedPermutationTraffic")) {
+            pattern = new TP_PairedPermutation();
+        } else if (!type.compare("PairedPodTraffic")) {
+            pattern = new TP_PairedPodPermutation();
+        } else if (!type.compare("LBDestImbalance")) {
+            pattern = new TP_LBDestImbalance();
+        } else if (!type.compare("AllToAll")) {
+            pattern = new TP_AllToAll();
+        } else if (!type.compare("AllToAllPartition")) {
+            pattern = new TP_AllToAllPartition();
+        } else if (!type.compare("AllToAllVictim")) {
+            pattern = new TP_AllToAllVictimTenant();
+        } else {
+            opp_error("Unknown traffic pattern.");
+        }
+        return pattern;
+    }
 };
 
 #endif /* TRAFFIC_PATTERN_FACTORY_H_ */

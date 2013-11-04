@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for DataCenter
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out -d src -XBuildFatTree -Xout -Xresults -Xsimulations -I/opt/local/include -L/opt/local/lib -L../inet/out/$(CONFIGNAME)/src -linet -DINET_IMPORT -KINET_PROJ=../inet
+#  opp_makemake -f --deep -O out -d src -XBuildFatTree -Xout -Xsimulations -I/opt/local/include -L/opt/local/lib -L../inet/out/$(CONFIGNAME)/src -linet -DINET_IMPORT -KINET_PROJ=../inet
 #
 
 # Name of target to be created (-o option)

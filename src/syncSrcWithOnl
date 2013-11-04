@@ -1,6 +1,0 @@
-#!/bin/bash
-
-ONLDATACENTER=`ssh mah5@onl.wustl.edu 'echo $DATACENTER'`
-THISDIR=`pwd`/.
-rsync -v -u --exclude='syncSrcWithOnl' --exclude='.DS_Store' --exclude='*_m.cc' --exclude='*_m.h' -r $THISDIR mah5@onl.wustl.edu:$ONLDATACENTER/src
-

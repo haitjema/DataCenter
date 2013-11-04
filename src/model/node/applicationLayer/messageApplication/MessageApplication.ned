@@ -46,7 +46,7 @@ simple MessageApplication extends FatTreeNode like SimpleUDPApplicationNode
         string messageScript = default("");
         bool writeButDontLoadScript = default(true); // Having every server read from a script can be inefficient.
         											// This option writes the script but does not read from it.
-		double messageSize @unit(bytes) = default(10 GiB);// default(8.58993e+10 bytes);
+		int messageSize @unit(bytes) = default(10 GiB);
         string scriptGenType = default("PairedPermutationTraffic");
         int partitionSize = default(0); // XXX Temp for SG_AllToAllPartition, 0 means use # paths
         bool recordStreamStatistics = default(true); 

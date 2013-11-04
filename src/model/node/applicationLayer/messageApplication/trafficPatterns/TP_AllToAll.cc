@@ -18,7 +18,7 @@
 
 AppMessageVector TP_AllToAll::createTraffic(const SubTreeID &node_id, double messageSize)
 {
-    node_id_ = node_id; messageSize = messageSize;
+    node_id_ = node_id; messageSize_ = messageSize;
     AppMessageVector messages;
     for (uint i = 0; i < node_id_.getNumberOfServers(); i++) {
         uint server_address = i;
