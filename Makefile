@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for DataCenter
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out -d src -XBuildFatTree -Xout -Xsimulations -I/opt/local/include -L/opt/local/lib -L../inet/out/$(CONFIGNAME)/src -linet -DINET_IMPORT -KINET_PROJ=../inet
+#  opp_makemake -f
 #
 
 # Name of target to be created (-o option)
@@ -14,14 +14,13 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 #USERIF_LIBS = $(TKENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -I/opt/local/include -I.
+INCLUDE_PATH = -I.
 
 # Additional object and library files to link with
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = -L/opt/local/lib -L../inet/out/$(CONFIGNAME)/src  -linet
-LIBS += -Wl,-rpath,`abspath /opt/local/lib` -Wl,-rpath,`abspath ../inet/out/$(CONFIGNAME)/src`
+LIBS =
 
 # Output directory
 PROJECT_OUTPUT_DIR = out
@@ -33,9 +32,6 @@ OBJS =
 
 # Message files
 MSGFILES =
-
-# Other makefile variables (-K)
-INET_PROJ=../inet
 
 #------------------------------------------------------------------------------
 
@@ -61,7 +57,7 @@ include $(CONFIGFILE)
 OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" -loppmain$D $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 
-COPTS = $(CFLAGS) -DINET_IMPORT $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
+COPTS = $(CFLAGS)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 MSGCOPTS = $(INCLUDE_PATH)
 
 # we want to recompile everything if COPTS changes,
@@ -84,18 +80,12 @@ endif
 all: $O/$(TARGET)
 	$(Q)$(LN) $O/$(TARGET) .
 
-$O/$(TARGET): $(OBJS) submakedirs $(wildcard $(EXTRA_OBJS)) Makefile
+$O/$(TARGET): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile
 	@$(MKPATH) $O
 	@echo Creating executable: $@
 	$(Q)$(CXX) $(LDFLAGS) -o $O/$(TARGET)  $(OBJS) $(EXTRA_OBJS) $(AS_NEEDED_OFF) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS)
 
-submakedirs:  src_dir
-
-.PHONY: all clean cleanall depend msgheaders  src
-src: src_dir
-
-src_dir:
-	cd src && $(MAKE) all
+.PHONY: all clean cleanall depend msgheaders
 
 .SUFFIXES: .cc
 
@@ -109,7 +99,6 @@ $O/%.o: %.cc $(COPTS_FILE)
 	$(Q)$(MSGC) -s _m.cc $(MSGCOPTS) $?
 
 msgheaders: $(MSGFILES:.msg=_m.h)
-	$(Q)cd src && $(MAKE) msgheaders
 
 clean:
 	$(qecho) Cleaning...
@@ -117,15 +106,12 @@ clean:
 	$(Q)-rm -f DataCenter DataCenter.exe libDataCenter.so libDataCenter.a libDataCenter.dll libDataCenter.dylib
 	$(Q)-rm -f ./*_m.cc ./*_m.h
 
-	-$(Q)cd src && $(MAKE) clean
-
 cleanall: clean
 	$(Q)-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
 	$(qecho) Creating dependencies...
 	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc
-	$(Q)-cd src && if [ -f Makefile ]; then $(MAKE) depend; fi
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

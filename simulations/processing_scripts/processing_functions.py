@@ -41,8 +41,7 @@ import sys
 
 from scipy import stats
 
-from bash_scripts import shell
-from lib_common import BatchIntervalSet
+from simulations.common.lib_common import *
 
 
 mlog = logging.getLogger('simulations.processingFunctions')
@@ -61,18 +60,6 @@ for u in allUnits:
 expr = expr.rstrip("|") + ")$"
 RE_ALL_UNITS = re.compile(expr)
 
-def check_file(filename):
-    """Returns the full absolute path and file name if it exists."""
-    full_filename = os.path.join(os.path.abspath(os.path.dirname(filename)), os.path.basename(filename))
-    if not os.path.exists(full_filename):
-        raise StandardError("Invalid file: ", filename)
-    return full_filename
-
-def check_dir(fpath):
-    fpath = os.path.realpath(os.path.expanduser(fpath))
-    if not os.path.exists(fpath):
-        raise StandardError("Invalid path: ", fpath)
-    return fpath   
 
 def mean_ci(data, confidence=0.95):
     """Returns the mean and error for the specified degree of 
